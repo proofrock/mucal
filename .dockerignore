@@ -1,0 +1,8 @@
+web/node_modules
+web/dist
+*.md
+.git
+.github
+.vscode
+*.log
+/tmp

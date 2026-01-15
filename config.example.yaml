@@ -1,0 +1,27 @@
+# μCal Configuration Example
+
+# Timezone for displaying events (IANA timezone database name)
+time_zone: "Europe/Rome"
+
+# Auto-refresh interval in seconds
+auto_refresh: 60
+
+# List of CalDAV calendars to display
+calendars:
+  - name: "Birthdays"
+    url: "https://calendar.example.com/caldav/birthdays"
+    user_id: "mano"
+    password_file: "/secrets/birthdays.txt"
+    color: "#FF6B6B"
+
+  - name: "Personal"
+    url: "https://calendar.example.com/caldav/personal"
+    user_id: "mano"
+    password_file: "/secrets/personal.txt"
+    color: "#4ECDC4"
+
+  - name: "Work"
+    url: "https://calendar.example.com/caldav/work"
+    user_id: "mano"
+    password_file: "/secrets/work.txt"
+    color: "#45B7D1"

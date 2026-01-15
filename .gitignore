@@ -1,0 +1,32 @@
+# Binaries
+mucal
+*.exe
+*.dll
+*.so
+*.dylib
+/tmp
+
+# Go
+*.test
+*.out
+vendor/
+
+# Frontend
+web/node_modules/
+web/dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Config (example is committed, actual config is not)
+config.yaml
+password.txt
+secrets/

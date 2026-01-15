@@ -573,6 +573,13 @@ if len(flag.Args()) > 0 {
 - Consistent development workflow
 - Easy dependency management
 
+### 9. Context-Aware Past Day Hiding
+- Hide past days only in current week
+- Show all days in past/future weeks
+- Expandable with one click when needed
+- Focuses user attention on relevant events
+- Prevents unnecessary scrolling on weekends
+
 ## API Design
 
 ### Endpoint: GET /api/health
@@ -799,6 +806,113 @@ typescript: ^5.7.3
    - Clear reactivity model
    - Good TypeScript integration
 
+## Post-MVP Improvements
+
+After the initial MVP release, several important improvements were made based on deployment experience and user feedback:
+
+### 1. .gitignore Fix for cmd/mucal Directory
+
+**Problem:** The binary name `mucal` in `.gitignore` was matching any path containing "mucal", causing the `cmd/mucal/` directory to be excluded from git.
+
+**Impact:** GitHub Actions build failed with "directory not found" because the main.go file wasn't in the repository.
+
+**Solution:**
+```gitignore
+# Before
+mucal
+
+# After
+/mucal
+```
+
+Changed from `mucal` to `/mucal` to match only the binary in the root directory.
+
+### 2. Docker Image Tagging Strategy
+
+**Problem:** Initial GitHub Actions workflow generated only 3 tags without version prefix: `latest`, `0.0`, `0.0.1`.
+
+**User Requirement:** Generate 4 semantic version tags with `v` prefix: `latest`, `v0`, `v0.0`, `v0.0.1`.
+
+**Solution:**
+```yaml
+tags: |
+  type=semver,pattern={{raw}}              # v0.0.1
+  type=semver,pattern=v{{major}}.{{minor}} # v0.0
+  type=semver,pattern=v{{major}}           # v0
+  type=raw,value=latest                    # latest
+```
+
+This provides flexible Docker image pulling:
+- `latest` - Always the newest version
+- `v0` - Latest in major version 0
+- `v0.0` - Latest in minor version 0.0
+- `v0.0.1` - Specific version
+
+### 3. Apache 2.0 License Application
+
+**Implementation:**
+- Created `LICENSE` file with full Apache 2.0 text
+- Added copyright headers to all source files (Go and TypeScript)
+- Updated README with license information
+
+**Header Format:**
+```go
+// Copyright 2026 Mano
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+```
+
+### 4. Smart Past Day Hiding
+
+**User Feedback:** "Usually I don't need to see the events of past days, and if it's a Saturday I have to scroll down to see 'today'."
+
+**Problem:** When viewing the current week on Saturday, user had to scroll past 5 days of past events to see today's events.
+
+**Solution:** Implemented context-aware day visibility:
+
+**For Current Week:**
+- Past days are hidden by default
+- "Show N past days" button appears at the top
+- Clicking the button expands past days
+- Focus is automatically on today and future events
+
+**For Past/Future Weeks:**
+- All days are always visible
+- No button shown
+- User wants to see complete historical or future weeks
+
+**Implementation Details:**
+```typescript
+const isCurrentWeek = $derived(() => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const weekStart = new Date(calendarStore.selectedWeekStart);
+  weekStart.setHours(0, 0, 0, 0);
+  const weekEnd = new Date(calendarStore.weekEnd);
+  weekEnd.setHours(0, 0, 0, 0);
+  return today >= weekStart && today <= weekEnd;
+});
+```
+
+**User Experience:**
+- On Monday: 0 past days hidden, see full week
+- On Wednesday: 2 past days hidden, "Show 2 past days" button appears
+- On Saturday: 5 past days hidden, immediately see today and Sunday
+- Navigate to last week: All 7 days visible, no hiding
+- Navigate to next week: All 7 days visible, no hiding
+
+This dramatically improves usability for the most common use case (checking today's and upcoming events) while preserving full visibility for historical review.
+
 ## Version History
 
 - **v0.1.0** (MVP) - Initial release with core features
@@ -807,6 +921,13 @@ typescript: ^5.7.3
   - Multiple CalDAV calendars
   - Docker deployment
   - GitHub Actions CI/CD
+
+- **v0.1.1+** (Post-MVP) - Quality of life improvements
+  - Fixed .gitignore to include cmd/mucal in git
+  - Updated Docker tagging strategy (4 tags with v prefix)
+  - Applied Apache 2.0 license to all source files
+  - Smart past day hiding in current week
+  - Improved UX for daily usage
 
 ## Maintenance
 

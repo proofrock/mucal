@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { calendarStore } from '../stores/calendar.svelte';
+  import { calendarStore } from "../stores/calendar.svelte";
 </script>
 
 <nav class="navbar navbar-dark bg-primary">
   <div class="container-fluid px-3">
     <span class="navbar-brand mb-0 h1">μCal</span>
     {#if calendarStore.version}
-      <span class="badge bg-light text-primary">v{calendarStore.version}</span>
+      <span class="badge bg-light text-primary">{calendarStore.version}</span>
     {/if}
   </div>
 </nav>

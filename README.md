@@ -25,6 +25,7 @@ Visit http://localhost:8080 to see your calendars!
 
 - **Read-only calendar view** - Display events from one or more CalDAV calendars
 - **Week view** - Events grouped by day, displayed vertically for easy scrolling
+- **Smart past day hiding** - In current week, past days are hidden by default to focus on today and future (expandable with one click)
 - **Collapsible month calendar** - Toggle on-demand to select different weeks
 - **Quick navigation** - "Today" button to instantly jump to current week
 - **Recurring events** - Full support for RRULE with proper timezone handling
@@ -179,6 +180,8 @@ You can specify a different config file in two ways:
 - **Month calendar**: Click any day to jump to that week (when calendar is visible)
 - **Week view**: Use Previous/Next buttons to navigate between weeks
 - **Today button**: Instantly jump to the current week
+- **Past days in current week**: Hidden by default to focus on today and future; click "Show N past days" button to expand
+- **Past/future weeks**: All days are always visible when viewing non-current weeks
 - **Single scroll**: Scroll through all days and events together in one continuous view
 - **Current day**: Highlighted in blue
 - **Current events**: Ongoing events have a subtle background highlight

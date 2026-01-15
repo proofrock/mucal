@@ -1,11 +1,51 @@
 <script lang="ts">
   import { calendarStore } from '../stores/calendar.svelte';
   import DayColumn from './DayColumn.svelte';
-  import { formatDateRange } from '../utils/date';
+  import { formatDateRange, isDateToday } from '../utils/date';
+
+  let showPastDays = $state(false);
 
   const weekRange = $derived(
     formatDateRange(calendarStore.selectedWeekStart, calendarStore.weekEnd)
   );
+
+  // Check if we're viewing the current week
+  const isCurrentWeek = $derived(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const weekStart = new Date(calendarStore.selectedWeekStart);
+    weekStart.setHours(0, 0, 0, 0);
+    const weekEnd = new Date(calendarStore.weekEnd);
+    weekEnd.setHours(0, 0, 0, 0);
+    return today >= weekStart && today <= weekEnd;
+  });
+
+  // Split days into past and today/future (only for current week)
+  const pastDays = $derived(
+    calendarStore.weekDays.filter(day => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const dayDate = new Date(day);
+      dayDate.setHours(0, 0, 0, 0);
+      return dayDate < today;
+    })
+  );
+
+  const todayAndFutureDays = $derived(
+    calendarStore.weekDays.filter(day => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const dayDate = new Date(day);
+      dayDate.setHours(0, 0, 0, 0);
+      return dayDate >= today;
+    })
+  );
+
+  // Reset showPastDays when week changes
+  $effect(() => {
+    calendarStore.selectedWeekStart;
+    showPastDays = false;
+  });
 </script>
 
 <div class="week-view">
@@ -48,9 +88,36 @@
     </div>
   {:else}
     <div class="days-list">
-      {#each calendarStore.weekDays as day}
-        <DayColumn date={day} events={calendarStore.getEventsForDay(day)} />
-      {/each}
+      {#if isCurrentWeek()}
+        <!-- Current week: hide past days by default -->
+        {#if !showPastDays && pastDays.length > 0}
+          <div class="show-past-button-container">
+            <button
+              class="btn btn-sm btn-outline-secondary"
+              onclick={() => showPastDays = true}
+              aria-label="Show past days"
+            >
+              <i class="bi bi-chevron-down"></i>
+              Show {pastDays.length} past {pastDays.length === 1 ? 'day' : 'days'}
+            </button>
+          </div>
+        {/if}
+
+        {#if showPastDays}
+          {#each pastDays as day}
+            <DayColumn date={day} events={calendarStore.getEventsForDay(day)} />
+          {/each}
+        {/if}
+
+        {#each todayAndFutureDays as day}
+          <DayColumn date={day} events={calendarStore.getEventsForDay(day)} />
+        {/each}
+      {:else}
+        <!-- Past or future week: show all days -->
+        {#each calendarStore.weekDays as day}
+          <DayColumn date={day} events={calendarStore.getEventsForDay(day)} />
+        {/each}
+      {/if}
     </div>
   {/if}
 </div>
@@ -112,6 +179,19 @@
 
   .days-list {
     padding: 1rem;
+  }
+
+  .show-past-button-container {
+    display: flex;
+    justify-content: center;
+    padding: 1rem 0;
+    margin-bottom: 0.5rem;
+  }
+
+  .show-past-button-container button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
   }
 
   @media (max-width: 768px) {
